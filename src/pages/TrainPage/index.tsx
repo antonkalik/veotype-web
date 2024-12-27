@@ -65,12 +65,20 @@ export const TrainPage = () => {
   const [startTime, setStartTime] = useState<number | null>(null);
   const [rowTimes, setRowTimes] = useState<number[]>([]);
   const level = 0;
-  const textRows = texts[level];
+  const [textRows, setTextRows] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     inputRef.current?.focus();
     setStartTime(Date.now());
+
+    const updatedTextRows = texts[level].map((row, index) => {
+      if (index < texts[level].length - 1) {
+        return row + " ";
+      }
+      return row;
+    });
+    setTextRows(updatedTextRows);
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,8 +94,6 @@ export const TrainPage = () => {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     const currentRow = textRows[rowIndex];
     const currentIndex = typedText.length;
-
-    // List of keys to ignore
     const ignoredKeys = ["Shift", "Control", "Alt", "Meta", "CapsLock", "Tab"];
 
     if (ignoredKeys.includes(e.key)) {
@@ -95,20 +101,26 @@ export const TrainPage = () => {
     }
 
     if (e.key === "Enter") {
-      if (typedText === currentRow) {
-        const endTime = Date.now();
-        const duration = (endTime - (startTime || endTime)) / 1000; // duration in seconds
-        setRowTimes((prevTimes) => [...prevTimes, duration]);
-        setTypedText("");
-        setErrorIndex(null);
-        setRowIndex((prev) => prev + 1);
+      if (currentIndex < currentRow.length - 1) {
+        setErrorIndex(currentIndex);
         setErrorCounts((prevCounts) => ({
           ...prevCounts,
           enters: prevCounts.enters + 1,
         }));
+      } else if (typedText.trim() === currentRow.trim()) {
+        const endTime = Date.now();
+        const duration = (endTime - (startTime || endTime)) / 1000;
+        setRowTimes((prevTimes) => [...prevTimes, duration]);
+        setTypedText("");
+        setErrorIndex(null);
+        setRowIndex((prev) => prev + 1);
         setStartTime(Date.now());
-      } else if (currentIndex === currentRow.length) {
+      } else {
         setErrorIndex(currentIndex);
+        setErrorCounts((prevCounts) => ({
+          ...prevCounts,
+          enters: prevCounts.enters + 1,
+        }));
       }
       e.preventDefault();
     } else if (e.key === "Backspace") {
@@ -118,7 +130,7 @@ export const TrainPage = () => {
         setTypedText(prevRow);
         setErrorIndex(null);
       }
-    } else if (currentIndex < currentRow.length) {
+    } else if (currentIndex < currentRow.length - 1) {
       const expectedChar = currentRow[currentIndex];
       const typedChar = e.key;
 
@@ -146,6 +158,12 @@ export const TrainPage = () => {
           }));
         }
       }
+    } else if (currentIndex === currentRow.length - 1) {
+      setErrorIndex(currentIndex);
+      setErrorCounts((prevCounts) => ({
+        ...prevCounts,
+        letters: prevCounts.letters + 1,
+      }));
     }
   };
 
