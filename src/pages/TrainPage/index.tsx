@@ -1,67 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
-import classNames from "classnames";
 import texts from "./texts.json";
-
-type RenderTextProps = {
-  text: string;
-  typedText: string;
-  errorIndex: number | null;
-  isActiveRow: boolean;
-  isFinishedRow: boolean;
-};
-
-const RenderText: React.FC<RenderTextProps> = ({
-  text,
-  typedText,
-  errorIndex,
-  isActiveRow,
-  isFinishedRow,
-}) => {
-  const currentIndex = typedText.length;
-  return text.split("").map((char: string, index: number) => {
-    const isTyped = index < typedText.length;
-    const isCurrent = index === typedText.length;
-    const isCorrect = typedText[index] === char;
-    const isError = index === errorIndex;
-    const isSpaceError =
-      (char === " " && typedText[index] && typedText[index] !== " ") ||
-      (char === " " &&
-        index === text.length - 1 &&
-        isError &&
-        typedText[index] === " ");
-    const textColor = isCorrect ? "text-black" : "text-red-500";
-    const isEndRowError =
-      index === text.length - 1 &&
-      currentIndex === text.length &&
-      char !== "\n";
-
-    console.log("isEndRowError", { isEndRowError, char });
-
-    return (
-      <span
-        key={index}
-        className={classNames([
-          isTyped
-            ? textColor
-            : isActiveRow
-              ? "text-gray-400"
-              : isFinishedRow
-                ? "text-black"
-                : "text-gray-300",
-          (isError || isSpaceError || isEndRowError) &&
-            "border-b-2 border-red-700 bg-yellow-300 text-red-500",
-        ])}
-      >
-        {isCurrent && isActiveRow && !isError && (
-          <span className="inline-block w-px animate-blink bg-black">
-            &nbsp;
-          </span>
-        )}
-        {char}
-      </span>
-    );
-  });
-};
+import { RenderText } from "src/components/RenderText";
 
 export const TrainPage = () => {
   const [typedText, setTypedText] = useState("");
@@ -202,7 +141,7 @@ export const TrainPage = () => {
     <div className="flex h-full flex-col items-center justify-center">
       <h1 className="text-4xl font-bold">Train</h1>
       <div
-        className="f2qont-mono mt-4 w-full max-w-2xl cursor-text whitespace-pre-wrap text-lg"
+        className="mt-4 w-full max-w-2xl cursor-text whitespace-pre-wrap font-mono text-lg"
         onClick={handleDivClick}
       >
         {textRows.map((row, index) => {
