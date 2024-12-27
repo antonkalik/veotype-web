@@ -84,6 +84,13 @@ export const TrainPage = () => {
     const currentRow = textRows[rowIndex];
     const currentIndex = typedText.length;
 
+    // List of keys to ignore
+    const ignoredKeys = ["Shift", "Control", "Alt", "Meta", "CapsLock", "Tab"];
+
+    if (ignoredKeys.includes(e.key)) {
+      return;
+    }
+
     if (e.key === "Enter") {
       if (typedText === currentRow) {
         const endTime = Date.now();
@@ -108,7 +115,7 @@ export const TrainPage = () => {
         setTypedText(prevRow);
         setErrorIndex(null);
       }
-    } else if (currentIndex < currentRow.length && e.key !== "Shift") {
+    } else if (currentIndex < currentRow.length) {
       const expectedChar = currentRow[currentIndex];
       const typedChar = e.key;
 
