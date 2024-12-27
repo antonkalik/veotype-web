@@ -53,12 +53,21 @@ export const TrainPage = () => {
   const [typedText, setTypedText] = useState("");
   const [errorIndex, setErrorIndex] = useState<number | null>(null);
   const [rowIndex, setRowIndex] = useState(0);
+  const [errorCounts, setErrorCounts] = useState({
+    punctuation_marks: 0,
+    letters: 0,
+    enters: 0,
+    spaces: 0,
+  });
+  const [startTime, setStartTime] = useState<number | null>(null);
+  const [rowTimes, setRowTimes] = useState<number[]>([]);
   const level = 0;
   const textRows = texts[level];
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     inputRef.current?.focus();
+    setStartTime(Date.now());
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,9 +86,17 @@ export const TrainPage = () => {
 
     if (e.key === "Enter") {
       if (typedText === currentRow) {
+        const endTime = Date.now();
+        const duration = (endTime - (startTime || endTime)) / 1000; // duration in seconds
+        setRowTimes((prevTimes) => [...prevTimes, duration]);
         setTypedText("");
         setErrorIndex(null);
         setRowIndex((prev) => prev + 1);
+        setErrorCounts((prevCounts) => ({
+          ...prevCounts,
+          enters: prevCounts.enters + 1,
+        }));
+        setStartTime(Date.now());
       } else if (currentIndex === currentRow.length) {
         setErrorIndex(currentIndex);
       }
@@ -91,13 +108,43 @@ export const TrainPage = () => {
         setTypedText(prevRow);
         setErrorIndex(null);
       }
-    } else if (currentIndex === currentRow.length) {
-      setErrorIndex(currentIndex);
+    } else if (currentIndex < currentRow.length && e.key !== "Shift") {
+      const expectedChar = currentRow[currentIndex];
+      const typedChar = e.key;
+
+      if (typedChar !== expectedChar) {
+        setErrorIndex(currentIndex);
+        if (typedChar === " ") {
+          setErrorCounts((prevCounts) => ({
+            ...prevCounts,
+            spaces: prevCounts.spaces + 1,
+          }));
+        } else if (/[a-zA-Z]/.test(typedChar)) {
+          if (
+            typedChar.toLowerCase() !== expectedChar.toLowerCase() ||
+            (typedChar !== expectedChar && !e.shiftKey)
+          ) {
+            setErrorCounts((prevCounts) => ({
+              ...prevCounts,
+              letters: prevCounts.letters + 1,
+            }));
+          }
+        } else if (/[.,!?]/.test(typedChar)) {
+          setErrorCounts((prevCounts) => ({
+            ...prevCounts,
+            punctuation_marks: prevCounts.punctuation_marks + 1,
+          }));
+        }
+      }
     }
   };
 
   const handleDivClick = () => {
     inputRef.current?.focus();
+  };
+
+  const getTotalTime = () => {
+    return rowTimes.reduce((total, time) => total + time, 0).toFixed(2);
   };
 
   return (
@@ -138,6 +185,26 @@ export const TrainPage = () => {
       {rowIndex >= textRows.length && (
         <p className="mt-4 text-xl text-green-600">Training complete!</p>
       )}
+      <div className="mt-4 text-red-600">
+        <h2 className="text-xl font-bold">Error Counts:</h2>
+        <ul>
+          <li>Punctuation Marks: {errorCounts.punctuation_marks}</li>
+          <li>Letters: {errorCounts.letters}</li>
+          <li>Enters: {errorCounts.enters}</li>
+          <li>Spaces: {errorCounts.spaces}</li>
+        </ul>
+      </div>
+      <div className="mt-4 text-blue-600">
+        <h2 className="text-xl font-bold">Row Times:</h2>
+        <ul>
+          {rowTimes.map((time, index) => (
+            <li key={index}>
+              Row {index + 1}: {time.toFixed(2)} seconds
+            </li>
+          ))}
+        </ul>
+        <p className="mt-2 font-bold">Total Time: {getTotalTime()} seconds</p>
+      </div>
     </div>
   );
 };
