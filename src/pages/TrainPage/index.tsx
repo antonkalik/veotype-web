@@ -67,7 +67,7 @@ export const TrainPage = () => {
 
     if (input.length <= currentRow.length) {
       setTypedText(input);
-      setErrorIndex(null); // Clear error when typing
+      setErrorIndex(null);
     }
   };
 
@@ -76,25 +76,22 @@ export const TrainPage = () => {
     const currentIndex = typedText.length;
 
     if (e.key === "Enter") {
-      // Validate Enter key
       if (typedText === currentRow) {
         setTypedText("");
         setErrorIndex(null);
         setRowIndex((prev) => prev + 1);
       } else if (currentIndex === currentRow.length) {
-        setErrorIndex(currentIndex); // Error for pressing Enter without matching the row
+        setErrorIndex(currentIndex);
       }
       e.preventDefault();
     } else if (e.key === "Backspace") {
-      // Handle Backspace navigation
       if (typedText.length === 0 && rowIndex > 0) {
         const prevRow = textRows[rowIndex - 1];
         setRowIndex((prev) => prev - 1);
-        setTypedText(prevRow); // Set previous row as the current text
+        setTypedText(prevRow);
         setErrorIndex(null);
       }
     } else if (currentIndex === currentRow.length) {
-      // Disallow keys other than Enter at the end of the row
       setErrorIndex(currentIndex);
     }
   };
