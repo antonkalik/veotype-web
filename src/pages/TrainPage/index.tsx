@@ -22,6 +22,8 @@ const RenderText: React.FC<RenderTextProps> = ({
     const isCurrent = index === typedText.length;
     const isCorrect = typedText[index] === char;
     const isError = index === errorIndex;
+    const isSpaceError =
+      char === " " && typedText[index] && typedText[index] !== " ";
     const textColor = isCorrect ? "text-black" : "text-red-500";
 
     return (
@@ -35,7 +37,8 @@ const RenderText: React.FC<RenderTextProps> = ({
               : isFinishedRow
                 ? "text-black"
                 : "text-gray-300",
-          isError && "border-b-2 border-red-700 bg-yellow-300 text-red-500",
+          (isError || isSpaceError) &&
+            "border-b-2 border-red-700 bg-yellow-300 text-red-500",
         ])}
       >
         {isCurrent && isActiveRow && !isError && (
