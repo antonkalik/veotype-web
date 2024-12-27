@@ -17,14 +17,25 @@ const RenderText: React.FC<RenderTextProps> = ({
   isActiveRow,
   isFinishedRow,
 }) => {
+  const currentIndex = typedText.length;
   return text.split("").map((char: string, index: number) => {
     const isTyped = index < typedText.length;
     const isCurrent = index === typedText.length;
     const isCorrect = typedText[index] === char;
     const isError = index === errorIndex;
     const isSpaceError =
-      char === " " && typedText[index] && typedText[index] !== " ";
+      (char === " " && typedText[index] && typedText[index] !== " ") ||
+      (char === " " &&
+        index === text.length - 1 &&
+        isError &&
+        typedText[index] === " ");
     const textColor = isCorrect ? "text-black" : "text-red-500";
+    const isEndRowError =
+      index === text.length - 1 &&
+      currentIndex === text.length &&
+      char !== "\n";
+
+    console.log("isEndRowError", { isEndRowError, char });
 
     return (
       <span
@@ -37,7 +48,7 @@ const RenderText: React.FC<RenderTextProps> = ({
               : isFinishedRow
                 ? "text-black"
                 : "text-gray-300",
-          (isError || isSpaceError) &&
+          (isError || isSpaceError || isEndRowError) &&
             "border-b-2 border-red-700 bg-yellow-300 text-red-500",
         ])}
       >
@@ -130,18 +141,30 @@ export const TrainPage = () => {
         setTypedText(prevRow);
         setErrorIndex(null);
       }
+    } else if (e.key === " ") {
+      if (currentIndex === currentRow.length - 1) {
+        setErrorIndex(currentIndex);
+        setErrorCounts((prevCounts) => ({
+          ...prevCounts,
+          spaces: prevCounts.spaces + 1,
+        }));
+      } else {
+        const expectedChar = currentRow[currentIndex];
+        if (expectedChar !== " ") {
+          setErrorIndex(currentIndex);
+          setErrorCounts((prevCounts) => ({
+            ...prevCounts,
+            spaces: prevCounts.spaces + 1,
+          }));
+        }
+      }
     } else if (currentIndex < currentRow.length - 1) {
       const expectedChar = currentRow[currentIndex];
       const typedChar = e.key;
 
       if (typedChar !== expectedChar) {
         setErrorIndex(currentIndex);
-        if (typedChar === " ") {
-          setErrorCounts((prevCounts) => ({
-            ...prevCounts,
-            spaces: prevCounts.spaces + 1,
-          }));
-        } else if (/[a-zA-Z]/.test(typedChar)) {
+        if (/[a-zA-Z]/.test(typedChar)) {
           if (
             typedChar.toLowerCase() !== expectedChar.toLowerCase() ||
             (typedChar !== expectedChar && !e.shiftKey)
