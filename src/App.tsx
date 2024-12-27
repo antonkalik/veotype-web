@@ -1,35 +1,62 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { createRoutesFromElements, RouterProvider } from "react-router";
+import { createBrowserRouter, Route } from "react-router-dom";
+import { ErrorPage } from "src/pages/ErrorPage";
+import { Layout } from "src/components/Layout";
+import { HomePage } from "src/pages/HomePage";
+import { AboutPage } from "src/pages/AboutPage";
+import { LoginPage } from "src/pages/LoginPage";
+import { SignUpPage } from "src/pages/SignUpPage";
+import { ForgotPasswordPage } from "src/pages/ForgotPasswordPage";
+import { UserPage } from "src/pages/UserPage";
+import { SettingsPage } from "src/pages/SettingsPage";
+import { PostsPage } from "src/pages/PostsPage";
+import { PostPage } from "src/pages/PostPage";
+import { NotFoundPage } from "src/pages/NotFoundPage";
+import { SessionProvider } from "src/components/SessionProvider";
+import { PublicRoute } from "./components/PublicRoute";
+import { ProtectedRoute } from "src/components/ProtectedRoute";
+import { TrainPage } from "src/pages/TrainPage";
 
-function App() {
-  const [count, setCount] = useState(0)
+import { loginAction } from "src/actions/loginAction.ts";
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+const router = createBrowserRouter(
+  createRoutesFromElements(
+    <Route element={<SessionProvider />} errorElement={<ErrorPage />}>
+      <Route element={<Layout />}>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/train" element={<TrainPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route
+          path="/login"
+          element={<PublicRoute element={<LoginPage />} />}
+          action={loginAction}
+        />
+        <Route
+          path="/sign-up"
+          element={<PublicRoute element={<SignUpPage />} />}
+        />
+        <Route
+          path="/forgot-password"
+          element={<PublicRoute element={<ForgotPasswordPage />} />}
+        />
+        <Route
+          path="/account"
+          element={<ProtectedRoute element={<UserPage />} />}
+        />
+        <Route
+          path="/settings"
+          element={<ProtectedRoute element={<SettingsPage />} />}
+        />
+        <Route path="/posts" element={<ProtectedRoute />}>
+          <Route index element={<PostsPage />} />
+          <Route path=":uuid" element={<PostPage />} />
+        </Route>
+      </Route>
+      <Route path="*" element={<NotFoundPage />} />
+    </Route>,
+  ),
+);
 
-export default App
+export const App = () => {
+  return <RouterProvider router={router} />;
+};
