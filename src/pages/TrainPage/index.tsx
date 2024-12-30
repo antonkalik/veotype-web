@@ -13,7 +13,7 @@ export const TrainPage = () => {
     spaces: 0,
   });
   const [startTime, setStartTime] = useState<number | null>(null);
-  const [rowTimes, setRowTimes] = useState<number[]>([]);
+  const [rowTimes, setRowTimes] = useState<Map<number, number>>(new Map());
   const level = 0;
   const [textRows, setTextRows] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -60,7 +60,7 @@ export const TrainPage = () => {
       } else if (typedText.trim() === currentRow.trim()) {
         const endTime = Date.now();
         const duration = (endTime - (startTime || endTime)) / 1000;
-        setRowTimes((prevTimes) => [...prevTimes, duration]);
+        setRowTimes((prevTimes) => new Map(prevTimes).set(rowIndex, duration));
         setTypedText("");
         setErrorIndex(null);
         setRowIndex((prev) => prev + 1);
@@ -134,7 +134,11 @@ export const TrainPage = () => {
   };
 
   const getTotalTime = () => {
-    return rowTimes.reduce((total, time) => total + time, 0).toFixed(2);
+    let total = 0;
+    rowTimes.forEach((time) => {
+      total += time;
+    });
+    return total.toFixed(2);
   };
 
   return (
@@ -187,7 +191,7 @@ export const TrainPage = () => {
       <div className="mt-4 text-blue-600">
         <h2 className="text-xl font-bold">Row Times:</h2>
         <ul>
-          {rowTimes.map((time, index) => (
+          {Array.from(rowTimes.entries()).map(([index, time]) => (
             <li key={index}>
               Row {index + 1}: {time.toFixed(2)} seconds
             </li>
