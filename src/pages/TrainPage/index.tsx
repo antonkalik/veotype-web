@@ -17,6 +17,7 @@ export const TrainPage = () => {
   const level = 0;
   const [textRows, setTextRows] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
+  const isLastRow = rowIndex === textRows.length - 1;
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -83,6 +84,7 @@ export const TrainPage = () => {
     } else if (e.key === " ") {
       if (currentIndex === currentRow.length - 1) {
         setErrorIndex(currentIndex);
+        console.log("spaces error 1");
         setErrorCounts((prevCounts) => ({
           ...prevCounts,
           spaces: prevCounts.spaces + 1,
@@ -90,6 +92,7 @@ export const TrainPage = () => {
       } else {
         const expectedChar = currentRow[currentIndex];
         if (expectedChar !== " ") {
+          console.log("spaces error 2");
           setErrorIndex(currentIndex);
           setErrorCounts((prevCounts) => ({
             ...prevCounts,
@@ -114,13 +117,14 @@ export const TrainPage = () => {
             }));
           }
         } else if (/[.,!?]/.test(typedChar)) {
+          console.log("punctuation mark error");
           setErrorCounts((prevCounts) => ({
             ...prevCounts,
             punctuation_marks: prevCounts.punctuation_marks + 1,
           }));
         }
       }
-    } else if (currentIndex === currentRow.length - 1) {
+    } else if (currentIndex === currentRow.length - 1 && !isLastRow) {
       setErrorIndex(currentIndex);
       setErrorCounts((prevCounts) => ({
         ...prevCounts,
@@ -163,6 +167,7 @@ export const TrainPage = () => {
                 errorIndex={index === rowIndex ? errorIndex : null}
                 isActiveRow={isActiveRow}
                 isFinishedRow={isFinishedRow}
+                isLastRow={isLastRow}
               />
             </p>
           );

@@ -15,6 +15,7 @@ export const RenderText: React.FC<RenderTextProps> = ({
   errorIndex,
   isActiveRow,
   isFinishedRow,
+  isLastRow,
 }) => {
   const currentIndex = typedText.length;
 
@@ -33,7 +34,17 @@ export const RenderText: React.FC<RenderTextProps> = ({
     const isEndRowError =
       index === text.length - 1 &&
       currentIndex === text.length &&
-      char !== "\n";
+      char !== "\n" &&
+      !isLastRow;
+
+    const hasError = isError || isSpaceError || isEndRowError;
+
+    console.log("isLastRow", {
+      isLastRow,
+      isSpaceError,
+      isError,
+      isEndRowError,
+    });
 
     return (
       <span
@@ -46,8 +57,7 @@ export const RenderText: React.FC<RenderTextProps> = ({
               : isFinishedRow
                 ? "text-black"
                 : "text-gray-300",
-          (isError || isSpaceError || isEndRowError) &&
-            "border-b-2 border-red-700 bg-yellow-300 text-red-500",
+          hasError && "border-b-2 border-red-700 bg-yellow-300 text-red-500",
         ])}
       >
         {isCurrent && isActiveRow && !isError && (
