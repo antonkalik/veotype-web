@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from "react";
 import texts from "./texts.json";
 import { RenderText } from "src/components/RenderText";
 
+const [text] = texts;
+
 export const TrainPage = () => {
   const [typedText, setTypedText] = useState("");
   const [errorIndex, setErrorIndex] = useState<number | null>(null);
@@ -14,17 +16,19 @@ export const TrainPage = () => {
   });
   const [startTime, setStartTime] = useState<number | null>(null);
   const [rowTimes, setRowTimes] = useState<Map<number, number>>(new Map());
-  const level = 0;
+
   const [textRows, setTextRows] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const isLastRow = rowIndex === textRows.length - 1;
+
+  console.log("typedText", typedText);
 
   useEffect(() => {
     inputRef.current?.focus();
     setStartTime(Date.now());
 
-    const updatedTextRows = texts[level].map((row, index) => {
-      if (index < texts[level].length - 1) {
+    const updatedTextRows = text.map((row, index) => {
+      if (index < text.length - 1) {
         return row + " ";
       }
       return row;
@@ -181,7 +185,7 @@ export const TrainPage = () => {
           className="absolute left-[-9999px]"
         />
       </div>
-      {rowIndex >= textRows.length && (
+      {typedText === text[text.length - 1] && (
         <p className="mt-4 text-xl text-green-600">Training complete!</p>
       )}
       <div className="mt-4 text-red-600">

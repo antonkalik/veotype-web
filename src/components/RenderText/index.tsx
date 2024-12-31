@@ -7,6 +7,7 @@ type RenderTextProps = {
   errorIndex: number | null;
   isActiveRow: boolean;
   isFinishedRow: boolean;
+  isLastRow: boolean;
 };
 
 export const RenderText: React.FC<RenderTextProps> = ({
@@ -38,13 +39,6 @@ export const RenderText: React.FC<RenderTextProps> = ({
       !isLastRow;
 
     const hasError = isError || isSpaceError || isEndRowError;
-
-    console.log("isLastRow", {
-      isLastRow,
-      isSpaceError,
-      isError,
-      isEndRowError,
-    });
 
     return (
       <span
