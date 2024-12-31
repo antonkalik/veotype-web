@@ -19,6 +19,10 @@ export const RenderText: React.FC<RenderTextProps> = ({
   isLastRow,
 }) => {
   const currentIndex = typedText.length;
+  const errorStyles = "border-b-2 border-red-700 bg-yellow-300 text-red-500";
+  const rowStateStyle = isFinishedRow ? "text-black" : "text-gray-300";
+  const rowActivityStyle = isActiveRow ? "text-gray-400" : rowStateStyle;
+
   return (
     <p className={isActiveRow || isFinishedRow ? "font-bold" : ""}>
       {text.split("").map((char: string, index: number) => {
@@ -32,7 +36,7 @@ export const RenderText: React.FC<RenderTextProps> = ({
             index === text.length - 1 &&
             isError &&
             typedText[index] === " ");
-        const textColor = isCorrect ? "text-black" : "text-red-500";
+        const textColor = isCorrect ? "text-black" : errorStyles;
         const isEndRowError =
           index === text.length - 1 &&
           currentIndex === text.length &&
@@ -45,15 +49,8 @@ export const RenderText: React.FC<RenderTextProps> = ({
           <span
             key={index}
             className={classNames([
-              isTyped
-                ? textColor
-                : isActiveRow
-                  ? "text-gray-400"
-                  : isFinishedRow
-                    ? "text-black"
-                    : "text-gray-300",
-              hasError &&
-                "border-b-2 border-red-700 bg-yellow-300 text-red-500",
+              isTyped ? textColor : rowActivityStyle,
+              hasError && errorStyles,
             ])}
           >
             {isCurrent && isActiveRow && !isError && (

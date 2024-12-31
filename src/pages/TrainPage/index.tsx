@@ -141,8 +141,7 @@ export const TrainPage = () => {
   };
 
   return (
-    <div className="flex h-full flex-col items-center justify-center">
-      <h1 className="text-4xl font-bold">Train</h1>
+    <div className="relative flex h-full flex-col items-center justify-center border-2 border-red-700">
       <div
         className="mt-4 w-full max-w-2xl cursor-text whitespace-pre-wrap font-mono text-lg"
         onClick={handleDivClick}
