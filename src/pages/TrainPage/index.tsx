@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import texts from "./texts.json";
 import { RenderText } from "src/components/RenderText";
+import { Stats } from "src/components/Stats";
+import { StepControl } from "src/components/StepControl";
 
 const [text] = texts;
 
@@ -14,6 +16,8 @@ enum ErrorType {
 }
 
 export const TrainPage = () => {
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const [typedText, setTypedText] = useState("");
   const [errorIndex, setErrorIndex] = useState<number | null>(null);
   const [rowIndex, setRowIndex] = useState(0);
@@ -26,9 +30,10 @@ export const TrainPage = () => {
   const [startTime, setStartTime] = useState<number | null>(null);
   const [rowTimes, setRowTimes] = useState<Map<number, number>>(new Map());
   const [textRows, setTextRows] = useState<string[]>([]);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const isLastRow = rowIndex === textRows.length - 1;
+
   const currentIndex = typedText.length;
+  const isLastRow = rowIndex === textRows.length - 1;
+  const isCompleted = typedText === text[text.length - 1];
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -42,6 +47,13 @@ export const TrainPage = () => {
     });
     setTextRows(updatedTextRows);
   }, []);
+
+  useEffect(() => {
+    if (isCompleted) {
+      inputRef.current?.blur();
+      inputRef.current?.setAttribute("disabled", "true");
+    }
+  }, [isCompleted]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target.value;
@@ -68,13 +80,17 @@ export const TrainPage = () => {
       return;
     }
 
+    const setTime = () => {
+      const endTime = Date.now();
+      const duration = (endTime - (startTime || endTime)) / 1000;
+      setRowTimes((prevTimes) => new Map(prevTimes).set(rowIndex, duration));
+    };
+
     if (e.key === "Enter") {
       if (currentIndex < currentRow.length - 1) {
         setError(ErrorType.Enters);
       } else if (typedText.trim() === currentRow.trim()) {
-        const endTime = Date.now();
-        const duration = (endTime - (startTime || endTime)) / 1000;
-        setRowTimes((prevTimes) => new Map(prevTimes).set(rowIndex, duration));
+        setTime();
         setTypedText("");
         setErrorIndex(null);
         setRowIndex((prev) => prev + 1);
@@ -91,14 +107,11 @@ export const TrainPage = () => {
         setErrorIndex(null);
       }
     } else if (e.key === " ") {
-      if (currentIndex === currentRow.length - 1) {
+      if (
+        currentIndex === currentRow.length - 1 ||
+        currentRow[currentIndex] !== " "
+      ) {
         setError(ErrorType.Spaces);
-      } else {
-        const expectedChar = currentRow[currentIndex];
-
-        if (expectedChar !== " ") {
-          setError(ErrorType.Spaces);
-        }
       }
     } else if (currentIndex < currentRow.length - 1) {
       const expectedChar = currentRow[currentIndex];
@@ -106,6 +119,8 @@ export const TrainPage = () => {
 
       if (typedChar !== expectedChar) {
         if (/[a-zA-Z]/.test(typedChar)) {
+          const isWrongType =
+            typedChar.toLowerCase() !== expectedChar.toLowerCase();
           if (
             typedChar.toLowerCase() !== expectedChar.toLowerCase() ||
             (typedChar !== expectedChar && !e.shiftKey)
@@ -125,14 +140,6 @@ export const TrainPage = () => {
     inputRef.current?.focus();
   };
 
-  const getTotalTime = () => {
-    let total = 0;
-    rowTimes.forEach((time) => {
-      total += time;
-    });
-    return total.toFixed(2);
-  };
-
   return (
     <div className="flex h-full flex-col items-center justify-center">
       <h1 className="text-4xl font-bold">Train</h1>
@@ -145,19 +152,15 @@ export const TrainPage = () => {
           const isFinishedRow = index < rowIndex;
 
           return (
-            <p
+            <RenderText
               key={index}
-              className={isActiveRow || isFinishedRow ? "font-bold" : ""}
-            >
-              <RenderText
-                text={row}
-                typedText={index === rowIndex ? typedText : ""}
-                errorIndex={index === rowIndex ? errorIndex : null}
-                isActiveRow={isActiveRow}
-                isFinishedRow={isFinishedRow}
-                isLastRow={isLastRow}
-              />
-            </p>
+              text={row}
+              typedText={index === rowIndex ? typedText : ""}
+              errorIndex={index === rowIndex ? errorIndex : null}
+              isActiveRow={isActiveRow}
+              isFinishedRow={isFinishedRow}
+              isLastRow={isLastRow}
+            />
           );
         })}
         <input
@@ -169,29 +172,8 @@ export const TrainPage = () => {
           className="absolute left-[-9999px]"
         />
       </div>
-      {typedText === text[text.length - 1] && (
-        <p className="mt-4 text-xl text-green-600">Training complete!</p>
-      )}
-      <div className="mt-4 text-red-600">
-        <h2 className="text-xl font-bold">Error Counts:</h2>
-        <ul>
-          <li>Punctuation Marks: {errorCounts.punctuation_marks}</li>
-          <li>Letters: {errorCounts.letters}</li>
-          <li>Enters: {errorCounts.enters}</li>
-          <li>Spaces: {errorCounts.spaces}</li>
-        </ul>
-      </div>
-      <div className="mt-4 text-blue-600">
-        <h2 className="text-xl font-bold">Row Times:</h2>
-        <ul>
-          {Array.from(rowTimes.entries()).map(([index, time]) => (
-            <li key={index}>
-              Row {index + 1}: {time.toFixed(2)} seconds
-            </li>
-          ))}
-        </ul>
-        <p className="mt-2 font-bold">Total Time: {getTotalTime()} seconds</p>
-      </div>
+      {isCompleted ? <StepControl /> : null}
+      <Stats errorCounts={errorCounts} rowTimes={rowTimes} />
     </div>
   );
 };
