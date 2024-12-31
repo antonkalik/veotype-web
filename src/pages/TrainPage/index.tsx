@@ -4,24 +4,31 @@ import { RenderText } from "src/components/RenderText";
 
 const [text] = texts;
 
+const ignoredKeys = ["Shift", "Control", "Alt", "Meta", "CapsLock", "Tab"];
+
+enum ErrorType {
+  PunctuationMarks = "punctuation_marks",
+  Letters = "letters",
+  Enters = "enters",
+  Spaces = "spaces",
+}
+
 export const TrainPage = () => {
   const [typedText, setTypedText] = useState("");
   const [errorIndex, setErrorIndex] = useState<number | null>(null);
   const [rowIndex, setRowIndex] = useState(0);
   const [errorCounts, setErrorCounts] = useState({
-    punctuation_marks: 0,
-    letters: 0,
-    enters: 0,
-    spaces: 0,
+    [ErrorType.PunctuationMarks]: 0,
+    [ErrorType.Letters]: 0,
+    [ErrorType.Enters]: 0,
+    [ErrorType.Spaces]: 0,
   });
   const [startTime, setStartTime] = useState<number | null>(null);
   const [rowTimes, setRowTimes] = useState<Map<number, number>>(new Map());
-
   const [textRows, setTextRows] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const isLastRow = rowIndex === textRows.length - 1;
-
-  console.log("typedText", typedText);
+  const currentIndex = typedText.length;
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -46,10 +53,16 @@ export const TrainPage = () => {
     }
   };
 
+  const setError = (type: ErrorType) => {
+    setErrorIndex(currentIndex);
+    setErrorCounts((prevCounts) => ({
+      ...prevCounts,
+      [type]: prevCounts[type] + 1,
+    }));
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     const currentRow = textRows[rowIndex];
-    const currentIndex = typedText.length;
-    const ignoredKeys = ["Shift", "Control", "Alt", "Meta", "CapsLock", "Tab"];
 
     if (ignoredKeys.includes(e.key)) {
       return;
@@ -57,11 +70,7 @@ export const TrainPage = () => {
 
     if (e.key === "Enter") {
       if (currentIndex < currentRow.length - 1) {
-        setErrorIndex(currentIndex);
-        setErrorCounts((prevCounts) => ({
-          ...prevCounts,
-          enters: prevCounts.enters + 1,
-        }));
+        setError(ErrorType.Enters);
       } else if (typedText.trim() === currentRow.trim()) {
         const endTime = Date.now();
         const duration = (endTime - (startTime || endTime)) / 1000;
@@ -71,11 +80,7 @@ export const TrainPage = () => {
         setRowIndex((prev) => prev + 1);
         setStartTime(Date.now());
       } else {
-        setErrorIndex(currentIndex);
-        setErrorCounts((prevCounts) => ({
-          ...prevCounts,
-          enters: prevCounts.enters + 1,
-        }));
+        setError(ErrorType.Enters);
       }
       e.preventDefault();
     } else if (e.key === "Backspace") {
@@ -87,21 +92,12 @@ export const TrainPage = () => {
       }
     } else if (e.key === " ") {
       if (currentIndex === currentRow.length - 1) {
-        setErrorIndex(currentIndex);
-        console.log("spaces error 1");
-        setErrorCounts((prevCounts) => ({
-          ...prevCounts,
-          spaces: prevCounts.spaces + 1,
-        }));
+        setError(ErrorType.Spaces);
       } else {
         const expectedChar = currentRow[currentIndex];
+
         if (expectedChar !== " ") {
-          console.log("spaces error 2");
-          setErrorIndex(currentIndex);
-          setErrorCounts((prevCounts) => ({
-            ...prevCounts,
-            spaces: prevCounts.spaces + 1,
-          }));
+          setError(ErrorType.Spaces);
         }
       }
     } else if (currentIndex < currentRow.length - 1) {
@@ -109,31 +105,19 @@ export const TrainPage = () => {
       const typedChar = e.key;
 
       if (typedChar !== expectedChar) {
-        setErrorIndex(currentIndex);
         if (/[a-zA-Z]/.test(typedChar)) {
           if (
             typedChar.toLowerCase() !== expectedChar.toLowerCase() ||
             (typedChar !== expectedChar && !e.shiftKey)
           ) {
-            setErrorCounts((prevCounts) => ({
-              ...prevCounts,
-              letters: prevCounts.letters + 1,
-            }));
+            setError(ErrorType.Letters);
           }
         } else if (/[.,!?]/.test(typedChar)) {
-          console.log("punctuation mark error");
-          setErrorCounts((prevCounts) => ({
-            ...prevCounts,
-            punctuation_marks: prevCounts.punctuation_marks + 1,
-          }));
+          setError(ErrorType.PunctuationMarks);
         }
       }
     } else if (currentIndex === currentRow.length - 1 && !isLastRow) {
-      setErrorIndex(currentIndex);
-      setErrorCounts((prevCounts) => ({
-        ...prevCounts,
-        letters: prevCounts.letters + 1,
-      }));
+      setError(ErrorType.Letters);
     }
   };
 
