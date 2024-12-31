@@ -10,3 +10,15 @@ export type SessionData = {
   logout: () => Promise<void>;
   login: (session: Session | null) => void;
 };
+
+export enum Locale {
+  en = "en",
+  es = "es",
+}
+
+export enum KeyboardType {
+  US = "US",
+  UK = "UK",
+  ES = "ES",
+  LATAM = "LATAM",
+}

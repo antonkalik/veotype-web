@@ -3,6 +3,7 @@ import texts from "./texts.json";
 import { RenderText } from "src/components/RenderText";
 import { Stats } from "src/components/Stats";
 import { StepControl } from "src/components/StepControl";
+import { Tips } from "src/components/Tips";
 
 const [text] = texts;
 
@@ -34,6 +35,8 @@ export const TrainPage = () => {
   const currentIndex = typedText.length;
   const isLastRow = rowIndex === textRows.length - 1;
   const isCompleted = typedText === text[text.length - 1];
+
+  const nextCharToType = text[rowIndex][currentIndex];
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -142,6 +145,7 @@ export const TrainPage = () => {
 
   return (
     <div className="relative flex h-full flex-col items-center justify-center border-2 border-red-700">
+      <Tips char={nextCharToType} />
       <div
         className="mt-4 w-full max-w-2xl cursor-text whitespace-pre-wrap font-mono text-lg"
         onClick={handleDivClick}

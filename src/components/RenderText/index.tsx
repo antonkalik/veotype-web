@@ -30,6 +30,7 @@ export const RenderText: React.FC<RenderTextProps> = ({
         const isCurrent = index === typedText.length;
         const isCorrect = typedText[index] === char;
         const isError = index === errorIndex;
+
         const isSpaceError =
           (char === " " && typedText[index] && typedText[index] !== " ") ||
           (char === " " &&
