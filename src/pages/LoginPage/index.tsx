@@ -1,13 +1,22 @@
 import { FC } from "react";
-import { useFormik } from "formik";
+import { useFormik, FormikErrors } from "formik";
 import { useNavigate } from "react-router-dom";
 import { Button, Label, TextInput, Card } from "flowbite-react";
 import { LoginSchema } from "./validations/LoginSchema.ts";
 import { Api } from "src/api";
-import Cookies from "js-cookie";
-import { CSRF_TOKEN_KEY } from "src/constants";
+import { useOutletContext } from "react-router";
+import { SessionData } from "src/types";
 
-const initialValues = import.meta.env.DEV
+interface LoginFormValues {
+  email: string;
+  password: string;
+}
+
+interface LoginFormErrors extends FormikErrors<LoginFormValues> {
+  common?: string;
+}
+
+const initialValues: LoginFormValues = import.meta.env.DEV
   ? {
       email: import.meta.env.VITE_TEST_EMAIL || "",
       password: import.meta.env.VITE_TEST_PASSWORD || "",
@@ -18,19 +27,21 @@ const initialValues = import.meta.env.DEV
     };
 
 export const LoginPage: FC = () => {
+  const session = useOutletContext<SessionData>();
   const navigate = useNavigate();
 
-  const formik = useFormik({
+  const formik = useFormik<LoginFormValues>({
     initialValues,
     validationSchema: LoginSchema,
     onSubmit: (values) => {
       Api.Auth.login(values.email, values.password)
         .then((response) => {
-          Cookies.set(CSRF_TOKEN_KEY, response.data.token);
+          session.setToken(response.data.token);
           navigate("/");
         })
-        .catch((error) => {
-          console.error("Failed to login:", error);
+        .catch(() => {
+          const errorMessage = "Invalid email or password";
+          formik.setErrors({ common: errorMessage } as LoginFormErrors);
         })
         .finally(() => {
           formik.setSubmitting(false);
@@ -58,8 +69,7 @@ export const LoginPage: FC = () => {
                 }
                 helperText={
                   formik.touched.email &&
-                  formik.errors.email &&
-                  typeof formik.errors.email === "string" && (
+                  formik.errors.email && (
                     <span className="text-sm text-red-500">
                       {formik.errors.email}
                     </span>
@@ -85,8 +95,7 @@ export const LoginPage: FC = () => {
                 }
                 helperText={
                   formik.touched.password &&
-                  formik.errors.password &&
-                  typeof formik.errors.password === "string" && (
+                  formik.errors.password && (
                     <span className="text-sm text-red-500">
                       {formik.errors.password}
                     </span>
@@ -97,6 +106,12 @@ export const LoginPage: FC = () => {
                 onBlur={formik.handleBlur}
               />
             </div>
+
+            {formik.errors.common && (
+              <div className="mb-4 text-center text-red-500">
+                {formik.errors.common}
+              </div>
+            )}
 
             <Button
               type="submit"

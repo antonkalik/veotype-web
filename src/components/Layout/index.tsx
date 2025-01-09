@@ -5,8 +5,7 @@ import { SessionData } from "src/types";
 
 export const Layout = () => {
   const session = useOutletContext<SessionData>();
-  console.log("Layout", session);
-
+  
   return (
     <div className="m-auto flex min-h-screen max-w-5xl flex-col">
       <Navigation />

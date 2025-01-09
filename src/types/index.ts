@@ -8,7 +8,7 @@ export type Session = {
 export type SessionData = {
   data: Session | null;
   logout: () => Promise<void>;
-  login: (session: Session | null) => void;
+  setToken: (token: string) => void;
 };
 
 export enum Locale {

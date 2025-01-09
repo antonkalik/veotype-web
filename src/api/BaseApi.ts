@@ -19,9 +19,17 @@ export class BaseApi {
     return Cookies.get(CSRF_TOKEN_KEY) || "";
   }
 
-  static headers = {
-    Authorization: `Bearer ${this.csrfToken}`,
-  };
+  static get headers() {
+    const headers: { [key: string]: string } = {
+      "Content-Type": "application/json",
+    };
+    const csrfToken = this.csrfToken;
+
+    if (csrfToken) {
+      headers["Authorization"] = `Bearer ${csrfToken}`;
+    }
+    return headers;
+  }
 
   static get<T>(url: string) {
     return this.request<T>({
@@ -71,7 +79,6 @@ export class BaseApi {
     try {
       const body = data ? JSON.stringify(data) : undefined;
       const finalUrl = this.getURI(url);
-
       const response = await fetch(finalUrl, {
         method: method.toUpperCase(),
         body,
