@@ -22,3 +22,16 @@ export enum KeyboardType {
   ES = "ES",
   LATAM = "LATAM",
 }
+
+export enum Theme {
+  light = "light",
+  dark = "dark",
+}
+
+export type Settings = {
+  theme: Theme;
+  locale: Locale;
+  keyboardType: KeyboardType;
+  difficulty: number;
+  showTips: boolean;
+};

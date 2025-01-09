@@ -17,8 +17,6 @@ import { PublicRoute } from "./components/PublicRoute";
 import { ProtectedRoute } from "src/components/ProtectedRoute";
 import { TrainPage } from "src/pages/TrainPage";
 
-import { loginAction } from "src/actions/loginAction.ts";
-
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route element={<SessionProvider />} errorElement={<ErrorPage />}>
@@ -29,7 +27,6 @@ const router = createBrowserRouter(
         <Route
           path="/login"
           element={<PublicRoute element={<LoginPage />} />}
-          action={loginAction}
         />
         <Route
           path="/sign-up"

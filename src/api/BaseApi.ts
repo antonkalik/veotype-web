@@ -30,8 +30,8 @@ export class BaseApi {
     });
   }
 
-  static post<Payload>(url: string, data?: Payload) {
-    return this.request({
+  static post<R, Payload>(url: string, data?: Payload) {
+    return this.request<R, Payload>({
       method: "POST",
       url,
       data,
@@ -65,7 +65,9 @@ export class BaseApi {
     method,
     url,
     data,
-  }: RequestParams<Payload>): Promise<R> {
+  }: RequestParams<Payload>): Promise<{
+    data: R;
+  }> {
     try {
       const body = data ? JSON.stringify(data) : undefined;
       const finalUrl = this.getURI(url);

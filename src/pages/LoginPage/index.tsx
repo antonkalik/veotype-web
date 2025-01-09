@@ -2,16 +2,35 @@ import { FC } from "react";
 import { useFormik } from "formik";
 import { Button, Label, TextInput, Card } from "flowbite-react";
 import { LoginSchema } from "./validations/LoginSchema.ts";
+import { Api } from "src/api";
+import Cookies from "js-cookie";
+import { CSRF_TOKEN_KEY } from "src/constants";
+
+const initialValues = import.meta.env.DEV
+  ? {
+      email: import.meta.env.VITE_TEST_EMAIL || "",
+      password: import.meta.env.VITE_TEST_PASSWORD || "",
+    }
+  : {
+      email: "",
+      password: "",
+    };
 
 export const LoginPage: FC = () => {
   const formik = useFormik({
-    initialValues: {
-      email: "",
-      password: "",
-    },
+    initialValues,
     validationSchema: LoginSchema,
     onSubmit: (values) => {
-      console.log("Form submitted:", values);
+      Api.Auth.login(values.email, values.password)
+        .then((response) => {
+          Cookies.set(CSRF_TOKEN_KEY, response.data.token);
+        })
+        .catch((error) => {
+          console.error("Failed to login:", error);
+        })
+        .finally(() => {
+          formik.setSubmitting(false);
+        });
     },
   });
 
@@ -35,7 +54,8 @@ export const LoginPage: FC = () => {
                 }
                 helperText={
                   formik.touched.email &&
-                  formik.errors.email && (
+                  formik.errors.email &&
+                  typeof formik.errors.email === "string" && (
                     <span className="text-sm text-red-500">
                       {formik.errors.email}
                     </span>
@@ -61,7 +81,8 @@ export const LoginPage: FC = () => {
                 }
                 helperText={
                   formik.touched.password &&
-                  formik.errors.password && (
+                  formik.errors.password &&
+                  typeof formik.errors.password === "string" && (
                     <span className="text-sm text-red-500">
                       {formik.errors.password}
                     </span>

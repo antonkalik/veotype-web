@@ -1,13 +1,21 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import texts from "./texts.json";
 import { RenderText } from "src/components/RenderText";
 import { Stats } from "src/components/Stats";
 import { StepControl } from "src/components/StepControl";
 import { Tips } from "src/components/Tips";
+import { KeyboardType, Locale, Settings } from "src/types";
 
 const [text] = texts;
 
 const ignoredKeys = ["Shift", "Control", "Alt", "Meta", "CapsLock", "Tab"];
+
+const settings: Settings = {
+  locale: Locale.en,
+  keyboardType: KeyboardType.US,
+  difficulty: 0,
+  showTips: false,
+};
 
 enum ErrorType {
   PunctuationMarks = "punctuation_marks",
@@ -124,10 +132,8 @@ export const TrainPage = () => {
         if (/[a-zA-Z]/.test(typedChar)) {
           const isWrongType =
             typedChar.toLowerCase() !== expectedChar.toLowerCase();
-          if (
-            typedChar.toLowerCase() !== expectedChar.toLowerCase() ||
-            (typedChar !== expectedChar && !e.shiftKey)
-          ) {
+
+          if (isWrongType || (typedChar !== expectedChar && !e.shiftKey)) {
             setError(ErrorType.Letters);
           }
         } else if (/[.,!?]/.test(typedChar)) {
