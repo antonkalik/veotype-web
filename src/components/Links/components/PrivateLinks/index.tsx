@@ -10,19 +10,19 @@ export const PrivateLinks = ({
 }) => (
   <>
     <NavLink
-      className="block w-full md:w-auto py-2 text-center hover:text-blue-500 md:mr-4 md:inline"
+      className="block w-full py-2 text-center hover:text-blue-500 md:mr-4 md:inline md:w-auto"
       to="/posts"
     >
       Posts
     </NavLink>
     <NavLink
-      className="block w-full md:w-auto py-2 text-center hover:text-blue-500 md:mr-4 md:inline"
+      className="block w-full py-2 text-center hover:text-blue-500 md:mr-4 md:inline md:w-auto"
       to="/settings"
     >
       Settings
     </NavLink>
     <NavLink
-      className="block w-full md:w-auto py-2 text-center hover:text-blue-500 md:mr-4 md:inline"
+      className="block w-full py-2 text-center hover:text-blue-500 md:mr-4 md:inline md:w-auto"
       to="/account"
     >
       My Profile

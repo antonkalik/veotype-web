@@ -1,5 +1,6 @@
 import { FC } from "react";
 import { useFormik } from "formik";
+import { useNavigate } from "react-router-dom";
 import { Button, Label, TextInput, Card } from "flowbite-react";
 import { LoginSchema } from "./validations/LoginSchema.ts";
 import { Api } from "src/api";
@@ -17,6 +18,8 @@ const initialValues = import.meta.env.DEV
     };
 
 export const LoginPage: FC = () => {
+  const navigate = useNavigate();
+
   const formik = useFormik({
     initialValues,
     validationSchema: LoginSchema,
@@ -24,6 +27,7 @@ export const LoginPage: FC = () => {
       Api.Auth.login(values.email, values.password)
         .then((response) => {
           Cookies.set(CSRF_TOKEN_KEY, response.data.token);
+          navigate("/");
         })
         .catch((error) => {
           console.error("Failed to login:", error);

@@ -1,15 +1,12 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { SessionData } from "src/types";
 import { Drawer } from "flowbite-react";
 import { IoCloseOutline } from "react-icons/io5";
 import { Links } from "src/components/Links";
 import { MenuButton } from "./components/MenuButton";
 import { Brand } from "src/components/Brand";
 
-export const Navigation: React.FC<{
-  session: SessionData;
-}> = ({ session }) => {
+export const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleClose = () => setIsOpen(false);
@@ -20,7 +17,7 @@ export const Navigation: React.FC<{
         <Brand />
       </NavLink>
       <div className="hidden flex-1 items-center justify-end md:flex">
-        <Links session={session} />
+        <Links />
       </div>
       <MenuButton onClick={() => setIsOpen(true)} />
       <Drawer position="right" open={isOpen} onClose={handleClose}>
@@ -32,7 +29,7 @@ export const Navigation: React.FC<{
           />
         </div>
         <Drawer.Items>
-          <Links session={session} />
+          <Links />
         </Drawer.Items>
       </Drawer>
     </div>
