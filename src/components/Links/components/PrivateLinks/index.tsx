@@ -31,7 +31,7 @@ export const PrivateLinks = ({
       onClick={onLogout}
       disabled={isLoading}
       color="gray"
-      className="w-full"
+      className="w-full md:w-auto"
     >
       {isLoading ? "Loading..." : "Logout"}
     </Button>

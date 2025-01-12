@@ -8,8 +8,9 @@ type RequestParams<Payload> = {
 };
 
 export class BaseApi {
-  public static baseUrl: string =
-    process.env.NODE_ENV !== "production" ? BASE_API_URL_DEV : BASE_API_URL;
+  public static baseUrl: string = import.meta.env.DEV
+    ? BASE_API_URL_DEV
+    : BASE_API_URL;
 
   public static getURI(url: string): string {
     return `${this.baseUrl}${url}`;
